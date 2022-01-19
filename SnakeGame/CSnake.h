@@ -4,19 +4,20 @@
 //Date Created : January 16, 2022
 
 #pragma once
+#include "CPosition.h"
 #include <Windows.h>
 #include <algorithm>
 #include <vector>
 
 using namespace std;
 
-
-typedef enum
+enum class Snake_Direction
 {
 	UP, DOWN, RIGHT, LEFT
-}Snake_Direction;
+};
 
-class CSnake
+
+class CSnake : public CPosition
 {
 
 private:
@@ -25,18 +26,17 @@ private:
 	COORD m_tail;
 	Snake_Direction m_direction;
 	int m_nlength;
-	COORD m_screenSize;
 	bool m_bIsAlive;
+	inline void CheckBodyCollision();
 
 public:
 	CSnake(COORD coord);
 	~CSnake();
 
-	void Crawl(Snake_Direction direction);
+	void Crawl();
 	void Grow(COORD pos);
+	void GrowBonus(COORD pos, int nLength);
 	void SetDirection(Snake_Direction dir);
-	void CheckBodyCollision();
-
 	vector<COORD> GetBodyLocation()
 	{
 		return m_vBody;

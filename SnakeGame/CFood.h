@@ -12,13 +12,18 @@ using namespace std;
 
 class CFood : public CPosition
 {
-
+private:
+	bool m_bIsBonus;
 public:
 	CFood();
 	CFood(COORD coord);
 	~CFood();
 
 	bool CreateFood();
+	bool IsBonusFood()
+	{
+		return m_bIsBonus;
+	}
 
 
 };

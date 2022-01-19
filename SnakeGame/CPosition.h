@@ -3,6 +3,7 @@
 //Email: enzotechcomputersolutions@gmail.com
 //Date Created : January 16, 2022
 #pragma once
+#include <Windows.h>
 class CPosition
 {
 protected:
@@ -10,6 +11,7 @@ protected:
 	int m_yPos;
 	int m_displayHeight;
 	int m_displayWidth;
+	COORD m_screenSize;
 
 public:
 	int getHorizontalPos()

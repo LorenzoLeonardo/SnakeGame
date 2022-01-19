@@ -30,22 +30,24 @@ private:
     char m_deleteTrailingChar;
     Snake_Direction m_dir;
     int m_nGameSpeed;
+    string m_nameLabel;
 
-    void GotoXY(int x, int y)
+    inline void GotoXY(int x, int y)
     {
         m_cursorPosition.X = x; // Locates column
         m_cursorPosition.Y = y; // Locates Row
         SetConsoleCursorPosition(m_console, m_cursorPosition); // Sets position for next thing to be printed 
     }
-    void DrawSnake(CSnake &snake)
+    inline void DrawSnake(CSnake &snake)
     {
         GotoXY(snake.getTail().X, snake.getTail().Y);
         cout << m_deleteTrailingChar;
 
-        GotoXY((m_screenSize.X / 2) - 15, m_screenSize.Y / 2);
-        cout << "Lorenzo Leonardo's Snake Game";
+        GotoXY((m_screenSize.X/2) - ((int)m_nameLabel.length()/2), m_screenSize.Y - 1);
+        cout << m_nameLabel;
 
-        snake.Crawl(m_dir);
+        snake.SetDirection(m_dir);
+        snake.Crawl();
 
         for (int i = 0; i < snake.GetLength(); i++)
         {
@@ -53,29 +55,33 @@ private:
             cout << m_snakeChar;
         }
     }
-    void DrawFood(CFood &food)
+    inline void DrawFood(CFood &food)
     {
-        food.CreateFood();
+        if (food.IsBonusFood())
+            m_foodChar = '8';
+        else
+            m_foodChar = '0';
+
         GotoXY(food.getHorizontalPos(), food.getVerticalPos());
         cout << m_foodChar;
     }
-    bool ListenForKeyPress()
+    inline bool ListenForKeyPress()
     {
-        if (GetAsyncKeyState(VK_LEFT) && m_dir != RIGHT)
+        if (GetAsyncKeyState(VK_LEFT) && m_dir != Snake_Direction::RIGHT)
         {
-            m_dir = LEFT;
+            m_dir = Snake_Direction::LEFT;
         }
-        else if (GetAsyncKeyState(VK_RIGHT) && m_dir != LEFT)
+        else if (GetAsyncKeyState(VK_RIGHT) && m_dir != Snake_Direction::LEFT)
         {
-            m_dir = RIGHT;
+            m_dir = Snake_Direction::RIGHT;
         }
-        else if (GetAsyncKeyState(VK_UP) && m_dir != DOWN)
+        else if (GetAsyncKeyState(VK_UP) && m_dir != Snake_Direction::DOWN)
         {
-            m_dir = UP;
+            m_dir = Snake_Direction::UP;
         }
-        else if (GetAsyncKeyState(VK_DOWN) && m_dir != UP)
+        else if (GetAsyncKeyState(VK_DOWN) && m_dir != Snake_Direction::UP)
         {
-            m_dir = DOWN;
+            m_dir = Snake_Direction::DOWN;
         }
         else if (GetAsyncKeyState(VK_ESCAPE))
         {
@@ -83,7 +89,7 @@ private:
         }
         return true;
     }
-    bool HasEaten(CSnake& snake, CFood& food)
+    inline bool HasEaten(CSnake& snake, CFood& food)
     {
         return ((snake.getHead().X == food.getHorizontalPos()) && snake.getHead().Y == food.getVerticalPos());
     }
@@ -93,11 +99,12 @@ public:
         m_foodChar = '0';
         m_snakeChar = '@';
         m_deleteTrailingChar = ' ';
-        m_dir = RIGHT;
+        m_dir = Snake_Direction::RIGHT;
         m_nGameSpeed = 50;
         m_console = NULL;
         m_cursorPosition = { 0,0 };
         m_screenSize = { 0,0 };
+        m_nameLabel = "Lorenzo Leonardo's Snake Game Windows Console Using C++ (c) 2022";
     }
     void InitializeArea()
     {
@@ -139,6 +146,8 @@ public:
         lpCursor.bVisible = false;
         lpCursor.dwSize = sizeof(CONSOLE_CURSOR_INFO);
         SetConsoleCursorInfo(m_console, &lpCursor);
+
+      //  system("cls");
     }
 
     void Run()
@@ -146,7 +155,9 @@ public:
         CFood food(m_screenSize);
         CSnake snake(m_screenSize);
        
-        m_dir = RIGHT;
+        m_dir = Snake_Direction::RIGHT;
+
+        food.CreateFood();
         DrawFood(food);
 
         while (snake.IsAlive() && ListenForKeyPress())
@@ -159,14 +170,24 @@ public:
                 posEaten.X = food.getHorizontalPos();
                 posEaten.Y = food.getVerticalPos();
 
-                snake.Grow(posEaten);
-                DrawFood(food);
-                PlaySound(TEXT("ding.wav"), NULL, SND_FILENAME | SND_ASYNC);
+                if (food.IsBonusFood())
+                {
+                    PlaySound(TEXT("Ring10.wav"), NULL, SND_FILENAME | SND_ASYNC);
+                    snake.GrowBonus(posEaten, 5);
+                }
+                else
+                {
+                    PlaySound(TEXT("ding.wav"), NULL, SND_FILENAME | SND_ASYNC);
+                    snake.Grow(posEaten);
+                }
+                food.CreateFood();
             }
+            DrawFood(food);
             Sleep(m_nGameSpeed);
         }
         PlaySound(TEXT("chord.wav"), NULL, SND_FILENAME | SND_ASYNC);
         Sleep(1000);
+        system("cls");
     }
 };
 

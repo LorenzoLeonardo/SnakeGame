@@ -29,7 +29,13 @@ CFood::~CFood()
 
 bool CFood::CreateFood()
 {
-	m_yPos = rand() % m_displayHeight;
+
+	if (rand() % 5 == 1)
+		m_bIsBonus = true;
+	else
+		m_bIsBonus = false;
+
+	m_yPos = rand() % (m_displayHeight - 1);
 	m_xPos = rand() % m_displayWidth;
 
 	return true;
